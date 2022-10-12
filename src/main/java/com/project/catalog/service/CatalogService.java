@@ -6,15 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import com.project.catalog.constants.CatalogConstant;
 import com.project.catalog.exception.CatalogException;
+import com.project.catalog.exception.NoDataFoundException;
 import com.project.catalog.exception.ProductNotFoundException;
 import com.project.catalog.model.Category;
 import com.project.catalog.model.Product;
+import com.project.catalog.response.ProductDTO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -72,5 +76,31 @@ public class CatalogService {
 			return categoryList;
 		}
 
+	}
+	
+	/*
+	 * This deleteProduct method will modify the isDeleted field in to true and
+	 * returns the modified Product
+	 * 
+	 */
+	
+	public ProductDTO deleteProduct(String id) {
+		log.info(CatalogConstant.PDT_CONST_DELT_STRT);
+		Query query = new Query();
+		query.addCriteria(Criteria.where("productId").is(id));
+		Update update = new Update();
+		update.set("isDeleted", true);
+		Product pdt = mongoTemplate.findAndModify(query, update, Product.class);
+		if (!ObjectUtils.isEmpty(pdt)) {
+			log.info(CatalogConstant.PDT_CONST_DELT);
+			ProductDTO productDTO = new ProductDTO(pdt.getProductId(), pdt.getProductName(), pdt.getContractSpend(),
+					pdt.getStakeHolder(), pdt.getCategoryLevel(), pdt.getCategoryLevelDescription(),
+					pdt.getProductDescription(), pdt.getCreatedBy(), pdt.getCreatedTime(), pdt.getLastUpdatedBy(),
+					pdt.getLastUpdatedTime(), true);
+			log.info(CatalogConstant.PDT_CONST_DELT_EXIT);
+			return productDTO;
+		} else
+			log.info(CatalogConstant.PDT_CONST_NOT_DELT);
+		throw new NoDataFoundException(CatalogConstant.PDT_CONST_EXP_DELT);
 	}
 }

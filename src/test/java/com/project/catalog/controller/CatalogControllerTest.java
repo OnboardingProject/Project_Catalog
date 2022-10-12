@@ -3,6 +3,7 @@ package com.project.catalog.controller;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +25,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.project.catalog.model.Category;
 import com.project.catalog.model.Product;
+import com.project.catalog.response.ProductDTO;
 import com.project.catalog.service.CatalogService;
 
 @SpringBootTest
@@ -50,10 +53,11 @@ public class CatalogControllerTest {
 		mockMvc = MockMvcBuilders.standaloneSetup(catalogController).build();
 		
 		List<String> categoryList = Arrays.asList("1-1-1","1-1-2");
+		List<String> categoryDescList = Arrays.asList("Description1","Description2");
 		
-		product1 = new Product("1", "Converse", 5, 3, categoryList, "Admin", LocalDateTime.now(), "Admin", LocalDateTime.now(), false);
-		product2 = new Product("2", "Jira", 15, 10, categoryList, "Admin", LocalDateTime.now(), "Admin", LocalDateTime.now(), false);
-		product3 = new Product("3", "Confluence", 6, 13, categoryList, "Admin", LocalDateTime.now(), "Admin", LocalDateTime.now(), false);
+		product1 = new Product("1", "Converse", 5, 3, categoryList, categoryDescList, "Product Description", "Admin", LocalDateTime.now(), "Admin", LocalDateTime.now(), false);
+		product2 = new Product("2", "Jira", 15, 10, categoryList, categoryDescList, "Product Description", "Admin", LocalDateTime.now(), "Admin", LocalDateTime.now(), false);
+		product3 = new Product("3", "Confluence", 6, 13, categoryList, categoryDescList, "Product Description", "Admin", LocalDateTime.now(), "Admin", LocalDateTime.now(), false);
 		
 		products.add(product1);
 		products.add(product2);
@@ -65,12 +69,18 @@ public class CatalogControllerTest {
 		
 	}
 	
+	public ProductDTO getProductTestData() {
+		ProductDTO productDTO = new ProductDTO("123", "Teams", 500.0f, 4, Arrays.asList("1-2-3"),Arrays.asList("Description"), "Description of Product", "u45", null, "u45",
+				null, false);
+		return productDTO;
+	}
+	
 	@Test
 	public void searchProductSuccessTest() throws Exception {
 		
 		when(catalogService.searchProductByName("con")).thenReturn(products);
 		
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/catalog/product/con").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/catalog/searchproduct/con").contentType(MediaType.APPLICATION_JSON))
 		.andExpect(MockMvcResultMatchers.status().isFound());
 	}
 	
@@ -80,7 +90,7 @@ public class CatalogControllerTest {
 		products.clear();
 		when(catalogService.searchProductByName("Zoom")).thenReturn(products);
 		
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/catalog/product/Zoom").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/catalog/searchproduct/Zoom").contentType(MediaType.APPLICATION_JSON))
 		.andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
 	
@@ -102,5 +112,16 @@ public class CatalogControllerTest {
 				.andExpect(MockMvcResultMatchers.status().isNotFound());
 
 	}
+
+	@Test
+	public void deleteProductTest() throws ParseException, Exception {
+		ProductDTO productDTO = getProductTestData();
+		productDTO.setDeleted(true);
+		when(catalogService.deleteProduct(Mockito.anyString())).thenReturn(productDTO);
+		mockMvc.perform(
+				MockMvcRequestBuilders.delete("/api/v1/catalog/deleteproduct/1").accept(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk());
+	}
+
 
 }

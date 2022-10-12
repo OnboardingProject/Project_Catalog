@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.catalog.constants.CatalogConstant;
 import com.project.catalog.model.Category;
+import com.project.catalog.response.ProductDTO;
 import com.project.catalog.response.ResponsePayLoad;
 import com.project.catalog.service.CatalogService;
 
@@ -29,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/catalog")
+@RequestMapping(CatalogConstant.PDT_URL)
 public class CatalogController {
 	
 	@Autowired
@@ -41,7 +43,7 @@ public class CatalogController {
 	 * @description Fetch all products based on product name
 	 */
 	
-	@GetMapping("/product/{productName}")
+	@GetMapping(CatalogConstant.PDT_SEARCH_URL)
 	public ResponseEntity<ResponsePayLoad> searchProduct(@PathVariable String productName){
 		
 		log.info("Inside CatalogController searchProduct method");
@@ -66,7 +68,7 @@ public class CatalogController {
 	 * @return ResponseEntity<List<Category>>
 	 * @description : Fetch category list of catalog project.
 	 */
-	@GetMapping("/fetchCategory")
+	@GetMapping(CatalogConstant.CATEGORY_FETCH_URL)
 	@Operation(summary = "Fetch category", description = "API related to fetch categories", tags = "Get category")
 	public ResponseEntity<?> fetchCategory() {
 		log.info("Entering into fetchCategory api");
@@ -80,6 +82,14 @@ public class CatalogController {
 			log.info("Exiting from fetchCategory api");
 			return new ResponseEntity<List<Category>>(category, HttpStatus.OK);
 		}
+	}
+	
+	@DeleteMapping(CatalogConstant.PDT_DLT_URL)
+	public ResponseEntity<ProductDTO> deleteProduct(@PathVariable String id) {
+		log.info(CatalogConstant.PDT_CONST_CONTR_STRT);
+		ProductDTO productDTO = catalogService.deleteProduct(id);
+		log.info(CatalogConstant.PDT_CONST_CONTR_EXIT);
+		return new ResponseEntity<ProductDTO>(productDTO, HttpStatus.OK);
 	}
 
 }

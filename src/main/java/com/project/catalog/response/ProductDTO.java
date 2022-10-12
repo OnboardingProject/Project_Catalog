@@ -1,30 +1,26 @@
-package com.project.catalog.model;
+package com.project.catalog.response;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-/**
- * @author Amrutha Joseph
- * @description Entity class for product
- * @date 20 September 2022
+import lombok.ToString;
+/*
+ * Dto class representing product
  */
-
+@Document
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Document(collection = "Product")
-public class Product {
-
-	@Id
+@ToString
+public class ProductDTO {
+	
 	private String productId;
 	private String productName;
 	private float contractSpend;
@@ -37,5 +33,4 @@ public class Product {
 	private String lastUpdatedBy;
 	private LocalDateTime lastUpdatedTime;
 	private boolean isDeleted;
-	
 }
